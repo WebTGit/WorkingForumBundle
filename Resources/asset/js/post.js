@@ -19,12 +19,12 @@ jQuery(document).ready(() => {
      * Clear post editor content draft
      */
     jQuery('#wf_form_post').submit((e) => {
-        if (getCookie(`post_editor_${storeJs.postEditorId}`)) {
-            e.preventDefault();
-            clearInterval(saveTimeout);
-            eraseCookie(`post_editor_${storeJs.postEditorId}`);
-            e.target.submit();
-        }
+        // if (getCookie(`post_editor_${storeJs.postEditorId}`)) {
+        //     e.preventDefault();
+        //     clearInterval(saveTimeout);
+        //     eraseCookie(`post_editor_${storeJs.postEditorId}`);
+        //     e.target.submit();
+        // }
     });
 
     /**
@@ -107,24 +107,24 @@ jQuery(document).ready(() => {
      * Save the post editor content as draft
      */
     savePostEditor = () => {
-        const postEditor = document.getElementsByClassName('wf_textarea_post')[0];
-
-        if (!postEditor || !postEditor.value) {
-            return;
-        }
-
-        setCookie(`post_editor_${storeJs.postEditorId}`, postEditor.value, 30);
-        const dateSaved = new Date();
-
-        if (jQuery('#saved_draft_msg').length) {
-            const msg = `${storeJs.trans['message.post_saved_draft']} ${dateSaved.getHours()}:${dateSaved.getMinutes()<10?'0':''}${dateSaved.getMinutes()}`;
-            jQuery('#saved_draft_msg').html(msg);
-        } else {
-            const msg = `
-                <div id="saved_draft_msg" class="wf_small_message">
-                ${storeJs.trans['message.post_saved_draft']} ${dateSaved.getHours()}:${dateSaved.getMinutes()<10?'0':''}${dateSaved.getMinutes()}
-                </div>`;
-            jQuery('.md-header').after(msg);
-        }
+        // const postEditor = document.getElementsByClassName('wf_textarea_post')[0];
+        //
+        // if (!postEditor || !postEditor.value) {
+        //     return;
+        // }
+        //
+        // setCookie(`post_editor_${storeJs.postEditorId}`, postEditor.value, 30);
+        // const dateSaved = new Date();
+        //
+        // if (jQuery('#saved_draft_msg').length) {
+        //     const msg = `${storeJs.trans['message.post_saved_draft']} ${dateSaved.getHours()}:${dateSaved.getMinutes()<10?'0':''}${dateSaved.getMinutes()}`;
+        //     jQuery('#saved_draft_msg').html(msg);
+        // } else {
+        //     const msg = `
+        //         <div id="saved_draft_msg" class="wf_small_message">
+        //         ${storeJs.trans['message.post_saved_draft']} ${dateSaved.getHours()}:${dateSaved.getMinutes()<10?'0':''}${dateSaved.getMinutes()}
+        //         </div>`;
+        //     jQuery('.md-header').after(msg);
+        // }
     }
 });

@@ -30,7 +30,10 @@ class PostType extends AbstractType
                 [
                     'translation_domain' => 'YosimitsoWorkingForumBundle',
                     'label' => 'forum.content',
-                    'attr' => ['class' => 'wf_textarea_post'],
+                    'attr' => [
+                        'rows' => 6,
+                        'class' => 'wf_textarea_post_disabled'
+                    ],
                 ]
             )
             ->add('filesUploaded',

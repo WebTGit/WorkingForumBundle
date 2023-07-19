@@ -68,13 +68,13 @@ class QuoteTwigExtension extends AbstractExtension
                 ;
 
                 if (!is_null($post) && empty($post->getModerateReason())) {
-                    return "\n>**"
-                        . $post->getUser()->getUsername()
+                    return ">**"
+                        . $post->getUser()->getFullname()
                         . ' '
                         . $this->translator->trans('forum.has_written', [], 'YosimitsoWorkingForumBundle')
-                        . " :** \n"
+                        . ":** \n"
                         . '>'.$this->markdownQuote($this->quote($post->getContent()))
-                        . "\n\n";
+                        . "\n";
                 }
 
                 return '';

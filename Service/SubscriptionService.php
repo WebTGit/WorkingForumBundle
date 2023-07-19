@@ -63,16 +63,23 @@ class SubscriptionService
         if (!is_null($notifs)) {
             foreach ($notifs as $notif) {
                 try {
-                    if (!empty($notif->getUser()->getEmailAddress())) {
+                    if (
+                        !empty($notif->getUser()->getEmailAddress()) and            // Only if valid Email
+                        $notif->getUser()->getId() !== $post->getUser()->getId()    // Post User is not equal to Notif User
+                    ) {
+                        $emailTranslation['user'] = $notif->getUser();
                         $email = (new Email())
                             ->subject($this->translator->trans('subscription.emailNotification.subject', $emailTranslation, 'YosimitsoWorkingForumBundle'))
                             ->from($this->senderAddress)
                             ->to($notif->getUser()->getEmailAddress())
                             ->html(
                                 $this->templating->render(
-                                    '@YosimitsoWorkingForum/Email/notification_new_message_en.html.twig',
+                                    '@YosimitsoWorkingForum/Email/notification_new_message_'. $notif->getUser()->getLanguage()->getLocaleCode().'.html.twig',
                                     $emailTranslation
-                                ));
+                                )
+                            )
+                        ;
+
 
                         $this->mailer->send($email);
                     }

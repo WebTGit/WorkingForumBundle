@@ -147,8 +147,7 @@ jQuery(document).ready(() => {
             dataType: 'json',
             async: false,
             success: () => {
-                jQuery('#wf_add_subscription').html(storeJs.trans['forum.cancel_subscription']).addClass('wf_icon-remove');
-                jQuery('#wf_add_subscription').attr('onclick', 'cancelSubscription(); return false;');
+                jQuery("#wf_add_subscription").html('<i class="flaticon-cancel"></i>'+storeJs.trans["forum.cancel_subscription"]).addClass("btn-danger").removeClass("btn-primary").attr("onclick", "cancelSubscription(); return false;")
             },
             error: () => {
                 alert(storeJs.trans['message.generic_error']);
@@ -167,11 +166,7 @@ jQuery(document).ready(() => {
             dataType: 'json',
             async: false,
             success: () => {
-                jQuery('#cancel_subscription').html(storeJs.trans['message.subscription_cancelled']);
-                jQuery('#wf_add_subscription')
-                    .html(storeJs.trans['forum.add_subscription'])
-                    .removeClass('wf_icon-remove')
-                    .attr('onclick', 'addSubscription(); return false;');
+                jQuery("#wf_add_subscription").html('<i class="flaticon-email"></i>'+storeJs.trans["forum.add_subscription"]).addClass("btn-primary").removeClass("btn-danger").attr("onclick", "addSubscription(); return false;")
             },
             error: () => {
                 alert(storeJs.trans['message.generic_error']);

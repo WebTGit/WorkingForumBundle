@@ -9,6 +9,7 @@ use Yosimitso\WorkingForumBundle\Entity\Subforum;
 use Doctrine\ORM\Query;
 use Yosimitso\WorkingForumBundle\Entity\Thread;
 use Yosimitso\WorkingForumBundle\Entity\UserInterface;
+use App\Entity\User\UserDetail;
 
 /**
  * Class ThreadRepository
@@ -67,8 +68,10 @@ class ThreadRepository extends EntityRepository
             ->select('thread')
             ->addSelect('subforum')
             ->addSelect('forum')
-            ->addSelect('author.avatarUrl AS author_avatarUrl, author.username AS author_username')
-            ->addSelect('lastReplyUser.avatarUrl AS lastReplyUser_avatarUrl, lastReplyUser.username AS lastReplyUser_username')
+            ->addSelect('author.avatarUrl AS author_avatarUrl, author.email AS author_username')
+
+            ->addSelect('lastReplyUser.avatarUrl AS lastReplyUser_avatarUrl, lastReplyUser.email AS lastReplyUser_username')
+
             ->from($this->_entityName, 'thread')
             ->join(Post::class, 'post', 'WITH', 'post.thread = thread.id')
             ->join(UserInterface::class,'author','WITH','thread.author = author.id')
@@ -77,46 +80,51 @@ class ThreadRepository extends EntityRepository
             ->join(Forum::class, 'forum', 'WITH', 'subforum.forum = forum.id')
             ->where($where)
             ->andWhere('post.moderateReason IS NULL')
-            ;
+        ;
 
         if (!empty($whereSubforum))
         {
             $queryBuilder->andWhere('subforum.id IN ('.implode(',',$whereSubforum).')');
         }
-            $queryBuilder->setMaxResults($limit)
-                    
+        $queryBuilder->setMaxResults($limit)
+
         ;
         $query = $queryBuilder;
         $result = $query->getQuery()->getScalarResult();
 
         return $result;
     }
-    
+
     public function getAllBySubforum($subforum, $withPosts = false) : array
     {
         $query = $this->_em->createQueryBuilder()
-                ->select('thread')
-                ->addSelect('subforum')
-                ->addSelect('forum')
-                ->addSelect('author.avatarUrl AS author_avatarUrl, author.username AS author_username')
-                ->addSelect('lastReplyUser.avatarUrl AS lastReplyUser_avatarUrl, lastReplyUser.username AS lastReplyUser_username')
-                ->from($this->_entityName, 'thread')
-                ->join(UserInterface::class,'author','WITH','thread.author = author.id')
-                ->join(UserInterface::class, 'lastReplyUser', 'WITH', 'thread.lastReplyUser = lastReplyUser.id')
-                ->join(Subforum::class,'subforum','WITH','thread.subforum = subforum.id')
-                ->join(Forum::class, 'forum', 'WITH', 'subforum.forum = forum.id')
-                ->where('subforum.id = '.$subforum->getId())
-                ->andWhere('thread.slug != :slug_not_empty')
-                ->orderBy('thread.pin', 'DESC')
-                ->addOrderBy('thread.lastReplyDate', 'DESC')
-                ->setParameter('slug_not_empty', '')
-            ;
-        
+            ->select('thread')
+            ->addSelect('subforum')
+            ->addSelect('forum')
+            ->addSelect('author.avatarUrl AS author_avatarUrl')
+            ->addSelect('authorDetail')
+            ->addSelect('lastReplyUser.avatarUrl AS lastReplyUser_avatarUrl')
+            ->addSelect('lastReplyUserDetail')
+            ->from($this->_entityName, 'thread')
+            ->join(UserInterface::class,'author','WITH','thread.author = author.id')
+            ->join(UserDetail::class,'authorDetail','WITH','thread.author = authorDetail.user')
+            ->join(UserInterface::class, 'lastReplyUser', 'WITH', 'thread.lastReplyUser = lastReplyUser.id')
+            ->join(UserDetail::class,'lastReplyUserDetail','WITH','thread.lastReplyUser = lastReplyUserDetail.user')
+            ->join(Subforum::class,'subforum','WITH','thread.subforum = subforum.id')
+            ->join(Forum::class, 'forum', 'WITH', 'subforum.forum = forum.id')
+            ->where('subforum.id = '.$subforum->getId())
+            ->andWhere('thread.slug != :slug_not_empty')
+            ->orderBy('thread.pin', 'DESC')
+            ->addOrderBy('thread.lastReplyDate', 'DESC')
+            ->setParameter('slug_not_empty', '')
+        ;
+
         if ($withPosts) {
             $query->addSelect('post')
                 ->join(Post::class,'post','WITH','post.thread = thread.id');
         }
         $result = $query->getQuery()->getScalarResult();
+        dump($result);
         return $result;
     }
 }

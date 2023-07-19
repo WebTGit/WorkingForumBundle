@@ -8,6 +8,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Yosimitso\WorkingForumBundle\Entity\Subforum;
 
 /**
  * Class SearchType
@@ -35,7 +36,7 @@ class SearchType extends AbstractType
                 'forum',
                 EntityType::class,
                 [
-                    'class'              => 'YosimitsoWorkingForumBundle:Subforum',
+                    'class'              => Subforum::class,
                     'choice_label'       => 'name',
                     'multiple'           => true,
                     'label'              => 'search.search_in',

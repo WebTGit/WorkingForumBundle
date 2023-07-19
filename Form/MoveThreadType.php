@@ -7,6 +7,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Yosimitso\WorkingForumBundle\Entity\Post;
+use Yosimitso\WorkingForumBundle\Entity\Subforum;
 
 /**
  * Class MoveThreadType
@@ -26,7 +28,7 @@ class MoveThreadType extends AbstractType
                 'forum',
                 EntityType::class,
                 [
-                    'class' => 'YosimitsoWorkingForumBundle:Subforum',
+                    'class' => Subforum::class,
                     'choice_label' => 'name',
                     'multiple' => false,
                     'label' => 'search.search_in',
@@ -47,7 +49,7 @@ class MoveThreadType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'Yosimitso\WorkingForumBundle\Entity\Post',
+                'data_class' => Post::class,
             ]
         );
     }
