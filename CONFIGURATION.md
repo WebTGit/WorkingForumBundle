@@ -15,8 +15,9 @@ yosimitso_working_forum_bundle:
 |            | lock_thread_older_than        | No       | Integer (0 = disabled)    | 365         |  Days between the last thread's post and the autolocking of the thread, 0 means disabled |
 |            | post_flood_sec                | No       | Integer (0 = disabled)    | 30          | seconds minimum between each post for an user |
 |            | mailer_sender_address         | No       | String                    | (empty)     | "From" email address used by the bundle
+|            | mailer_sender_name            | No       | String                    | (empty)     | "From" email address name used by the bundle
 |vote:|
-|            |threshold_useful_post          | No       | Integer > 0               | 5           | Number of votes needed for a post to be considered as useful |
+|            | threshold_useful_post         | No       | Integer > 0               | 5           | Number of votes needed for a post to be considered as useful |
 |file_upload:|
 |            | enable                        | **Yes**  | Boolean                   |             | Allow or not users to upload enclosed files |
 |            | max_size_ko                   | No       | Integer > 0               | 10000       | Files size max per post, remember to check if this value is not greater than directives into your php.ini |

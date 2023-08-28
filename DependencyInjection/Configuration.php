@@ -109,6 +109,8 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('mailer_sender_address')
                 ->end()
+                ->scalarNode('mailer_sender_name')
+                ->end()
             ->end()
         ;
 

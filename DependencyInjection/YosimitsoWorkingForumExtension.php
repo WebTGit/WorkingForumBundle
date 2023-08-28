@@ -111,5 +111,6 @@ class YosimitsoWorkingForumExtension extends Extension
         $container->setParameter('yosimitso_working_forum.site_title', $config['site_title']);
         $container->setParameter('yosimitso_working_forum.thread_subscription', $config['thread_subscription']);
         $container->setParameter('yosimitso_working_forum.mailer_sender_address', $config['mailer_sender_address']);
+        $container->setParameter('yosimitso_working_forum.mailer_sender_name', $config['mailer_sender_name']);
     }
 }

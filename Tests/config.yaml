@@ -19,6 +19,7 @@ yosimitso_working_forum:
   thread_subscription:
     enable: true
   mailer_sender_address: noemail@test.com
+  mailer_sender_name: 'No Name'
 
 doctrine:
   dbal:
