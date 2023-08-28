@@ -124,6 +124,12 @@ class Thread
     private $pin;
 
     /**
+     * @var boolean
+     * @ORM\Column(name="notificationSent", type="boolean", options={"default":"0"})
+     */
+    private $notificationSent = false;
+
+    /**
      * Get id
      *
      * @return integer
@@ -441,6 +447,26 @@ class Thread
     public function getPin()
     {
         return $this->pin;
+    }
+
+    /**
+     * @param boolean $notificationSent
+     *
+     * @return Thread
+     */
+    public function setNotificationSent($notificationSent)
+    {
+        $this->notificationSent = $notificationSent;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getNotificationSent()
+    {
+        return $this->notificationSent;
     }
 
     /**

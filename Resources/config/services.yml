@@ -133,6 +133,12 @@ services:
       - { name: doctrine.event_listener, event: prePersist}
       - { name: doctrine.event_listener, event: postPersist}
 
+  Yosimitso\WorkingForumBundle\Event\ThreadEvent:
+    arguments:
+      - '@Yosimitso\WorkingForumBundle\Service\SubscriptionService'
+      - '%yosimitso_working_forum.thread_subscription%'
+    tags:
+      - { name: doctrine.event_listener, event: postUpdate }
 
   Yosimitso\WorkingForumBundle\Service\ThreadService:
     arguments:

@@ -56,10 +56,11 @@ class QuoteTwigExtension extends AbstractExtension
      *
      * @return mixed
      */
-    public function quote($text)
+    public function quote($text, $locale=null)
     {
         $content = preg_replace_callback('#\[quote=([0-9]+)\]#',
-            function ($listQuote) {
+            function ($listQuote) use ($locale)
+            {
 
                 /** @var Post $post */
                 $post = $this->entityManager

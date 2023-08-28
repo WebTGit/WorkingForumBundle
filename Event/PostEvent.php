@@ -69,7 +69,12 @@ class PostEvent
         }
 
         if ($this->paramSubscription['enable']) {
-            $this->subscriptionService->notifySubscriptions($entity);
+
+            // Notify only if there is more than one Post.
+            if(count($entity->getThread()->getPost()) > 1){
+                $this->subscriptionService->notifySubscriptions($entity);
+                $this->subscriptionService->notifyPostApplicationOwner($entity);
+            }
 
             if ($entity->getAddSubscription()) {
                 $this->addSubscription($entity);
