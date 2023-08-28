@@ -43,8 +43,8 @@ jQuery(document).ready(() => {
      * @param {int} postId
      */
     quote = (postId) => {
-        jQuery('.wf_textarea_post').val(`${jQuery('.wf_textarea_post').val()}[quote=${postId}]`);
-        jQuery('.wf_textarea_post').focus();
+        jQuery('.wf_textarea_post_disabled').val(`${jQuery('.wf_textarea_post_disabled').val()}[quote=${postId}]\n`);
+        jQuery('.wf_textarea_post_disabled').focus();
     }
 
     /**

@@ -48,18 +48,20 @@ class ThreadRepository extends EntityRepository
      *
      * @return Thread[]
      */
-    public function search(array $keywords, int $start = 0, int $limit = 100, array $whereSubforum = []) : ?array
+    public function search(string $keywords, int $start = 0, int $limit = 100, array $whereSubforum = []) : ?array
     {
         if (empty($whereSubforum)) {
             return null;
         }
-        $keywords = explode(' ', $keywords);
+        //$keywords = explode(' ', $keywords);
         $where = '';
 
-        foreach ($keywords as $word)
-        {
-            $where .= "(thread.label LIKE '%" . $word . "%' OR thread.subLabel LIKE '%" . $word . "%' OR post.content LIKE '%" . $word . "%') OR";
-        }
+//        foreach ($keywords as $word)
+//        {
+//            $where .= "(thread.label LIKE '%" . $word . "%' OR thread.subLabel LIKE '%" . $word . "%' OR post.content LIKE '%" . $word . "%') OR";
+//        }
+
+        $where .= "(thread.label LIKE '%" . $keywords . "%' OR thread.subLabel LIKE '%" . $keywords . "%' OR post.content LIKE '%" . $keywords . "%') OR";
 
         $where = rtrim($where, ' OR');
 
@@ -68,18 +70,25 @@ class ThreadRepository extends EntityRepository
             ->select('thread')
             ->addSelect('subforum')
             ->addSelect('forum')
-            ->addSelect('author.avatarUrl AS author_avatarUrl, author.email AS author_username')
+            ->addSelect('author.avatarUrl AS author_avatarUrl')
+            ->addSelect('authorDetail')
 
-            ->addSelect('lastReplyUser.avatarUrl AS lastReplyUser_avatarUrl, lastReplyUser.email AS lastReplyUser_username')
+            ->addSelect('lastReplyUser.avatarUrl AS lastReplyUser_avatarUrl')
+            ->addSelect('lastReplyUserDetail')
 
             ->from($this->_entityName, 'thread')
             ->join(Post::class, 'post', 'WITH', 'post.thread = thread.id')
             ->join(UserInterface::class,'author','WITH','thread.author = author.id')
+            ->join(UserDetail::class,'authorDetail','WITH','thread.author = authorDetail.user')
             ->join(UserInterface::class, 'lastReplyUser', 'WITH', 'thread.lastReplyUser = lastReplyUser.id')
+            ->join(UserDetail::class,'lastReplyUserDetail','WITH','thread.lastReplyUser = lastReplyUserDetail.user')
             ->join(Subforum::class,'subforum','WITH','thread.subforum = subforum.id')
             ->join(Forum::class, 'forum', 'WITH', 'subforum.forum = forum.id')
-            ->where($where)
+//            ->where($where)
+            ->orWhere('thread.label LIKE :keywords OR thread.subLabel LIKE :keywords OR post.content LIKE :keywordsEscaped ')
             ->andWhere('post.moderateReason IS NULL')
+            ->setParameter('keywords', sprintf("%%%s%%", $keywords))
+            ->setParameter('keywordsEscaped', sprintf("%%%s%%", htmlentities(strip_tags($keywords))))
         ;
 
         if (!empty($whereSubforum))
@@ -91,6 +100,17 @@ class ThreadRepository extends EntityRepository
         ;
         $query = $queryBuilder;
         $result = $query->getQuery()->getScalarResult();
+
+        //List Every Thread only once
+        $threadIds = [];
+        foreach ($result as $id => $r){
+            if(!in_array($r['thread_id'], $threadIds)){
+                $threadIds[] = $r['thread_id'];
+            }else{
+                unset($result[$id]);
+            }
+        }
+
 
         return $result;
     }
@@ -124,7 +144,7 @@ class ThreadRepository extends EntityRepository
                 ->join(Post::class,'post','WITH','post.thread = thread.id');
         }
         $result = $query->getQuery()->getScalarResult();
-        dump($result);
+
         return $result;
     }
 }

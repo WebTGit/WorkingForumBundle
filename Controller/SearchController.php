@@ -6,6 +6,7 @@ use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Yosimitso\WorkingForumBundle\Entity\Forum;
+use Yosimitso\WorkingForumBundle\Entity\Subforum;
 use Yosimitso\WorkingForumBundle\Entity\Thread;
 use Yosimitso\WorkingForumBundle\Form\SearchType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -46,7 +47,9 @@ class SearchController extends BaseController
         if ($form->isSubmitted()) {
             if ($form->isValid())
             {
-                $whereSubforum = (array) $this->authorizationGuard->hasSubforumAccessList($form['forum']->getData()->toArray());
+//                $whereSubforum = (array) $this->authorizationGuard->hasSubforumAccessList($form['forum']->getData()->toArray());
+                // Search Everywhere (All Subforums)
+                $whereSubforum = (array) $this->authorizationGuard->hasSubforumAccessList($this->em->getRepository(Subforum::class)->findAll());
 
                 $thread_list_query = $this->em->getRepository(Thread::class)
                                         ->search($form['keywords']->getData(), 0, 100, $whereSubforum)

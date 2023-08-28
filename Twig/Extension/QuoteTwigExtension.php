@@ -69,13 +69,11 @@ class QuoteTwigExtension extends AbstractExtension
                 ;
 
                 if (!is_null($post) && empty($post->getModerateReason())) {
-                    return ">**"
-                        . $post->getUser()->getFullname()
-                        . ' '
-                        . $this->translator->trans('forum.has_written', [], 'YosimitsoWorkingForumBundle')
-                        . ":** \n"
-                        . '>'.$this->markdownQuote($this->quote($post->getContent()))
-                        . "\n";
+
+                    $blockquote = "\n>**" . $post->getUser()->getFullname() . ' ' . $this->translator->trans('forum.has_written', [], 'YosimitsoWorkingForumBundle', $locale) . ":** <br>"
+                        .$this->markdownQuote($this->quote($post->getContent(), $locale)) . "\n\n";
+
+                    return $blockquote;
                 }
 
                 return '';

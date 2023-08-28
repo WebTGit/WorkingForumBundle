@@ -59,7 +59,7 @@ class ForumController extends BaseController
     /**
      * Display the thread list of a subforum
      *
-     * @Route("{forum}/{subforum}/view", name="workingforum_subforum")
+     * @Route("{forum}/{subforum}/view", name="workingforum_subforum", defaults={"forum": "forum","subforum": "general"})
      * @param Request $request
      * @param int $page
      * @return Response

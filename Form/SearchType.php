@@ -32,28 +32,28 @@ class SearchType extends AbstractType
                     'label'              => 'search.keywords',
                 ]
             )
-            ->add(
-                'forum',
-                EntityType::class,
-                [
-                    'class'              => Subforum::class,
-                    'choice_label'       => 'name',
-                    'multiple'           => true,
-                    'label'              => 'search.search_in',
-                    'translation_domain' => 'YosimitsoWorkingForumBundle',
-                    'group_by'           => function ($sub) {
-                        return $sub->getForum()->getName();
-                    },
-
-                ]
-            )
+//            ->add(
+//                'forum',
+//                EntityType::class,
+//                [
+//                    'class'              => Subforum::class,
+//                    'choice_label'       => 'name',
+//                    'multiple'           => true,
+//                    'label'              => 'search.search_in',
+//                    'translation_domain' => 'YosimitsoWorkingForumBundle',
+//                    'group_by'           => function ($sub) {
+//                        return $sub->getForum()->getName();
+//                    },
+//
+//                ]
+//            )
             ->add(
                 'submit',
                 SubmitType::class,
                 [
                     'label'              => 'forum.search_forum',
                     'translation_domain' => 'YosimitsoWorkingForumBundle',
-                    'attr'               => ['class' => 'wf_button'],
+                    'attr'               => ['class' => 'wf_button btn btn-sm btn-primary'],
                 ]
             )
         ;
