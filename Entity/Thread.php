@@ -99,7 +99,7 @@ class Thread
     /**
      * @var string
      *
-     * @ORM\Column(name="sublabel", type="string")
+     * @ORM\Column(name="sublabel", type="string", nullable=true)
      */
     private $subLabel;
 

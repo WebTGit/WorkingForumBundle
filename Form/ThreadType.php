@@ -32,15 +32,15 @@ class ThreadType extends AbstractType
                     'error_bubbling' => true,
                 ]
             )
-            ->add(
-                'sublabel',
-                TextType::class,
-                [
-                    'translation_domain' => 'YosimitsoWorkingForumBundle',
-                    'label' => 'forum.sublabel',
-                    'error_bubbling' => true,
-                ]
-            )
+//            ->add(
+//                'sublabel',
+//                TextType::class,
+//                [
+//                    'translation_domain' => 'YosimitsoWorkingForumBundle',
+//                    'label' => 'forum.sublabel',
+//                    'error_bubbling' => true,
+//                ]
+//            )
             ->add(
                 'post',
                 CollectionType::class,
