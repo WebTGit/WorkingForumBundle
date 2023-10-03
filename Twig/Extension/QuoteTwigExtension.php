@@ -4,6 +4,8 @@ namespace Yosimitso\WorkingForumBundle\Twig\Extension;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Security;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Yosimitso\WorkingForumBundle\Entity\Post;
@@ -25,17 +27,23 @@ class QuoteTwigExtension extends AbstractExtension
      */
     private $translator;
 
+    private $authorizationChecker;
+
     /**
      * @param EntityManagerInterface $entityManager
      * @param TranslatorInterface    $translator
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        AuthorizationCheckerInterface $authorizationChecker,
+        Security $security
     )
     {
         $this->entityManager = $entityManager;
         $this->translator = $translator;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->security = $security;
     }
 
     /**
@@ -68,9 +76,12 @@ class QuoteTwigExtension extends AbstractExtension
                     ->findOneById((int) $listQuote[1])
                 ;
 
+                //Fullname forcen wenn Admin oder PostUser gleich CurrentUser
+                $forceFullname = ($this->authorizationChecker->isGranted('ROLE_ADMIN') or $post->getUser()->getId() === $this->security->getUser()->getId());
+
                 if (!is_null($post) && empty($post->getModerateReason())) {
 
-                    $blockquote = "\n>**" . $post->getUser()->getFullname() . ' ' . $this->translator->trans('forum.has_written', [], 'YosimitsoWorkingForumBundle', $locale) . ":** <br>"
+                    $blockquote = "\n>**" . $post->getUser()->getFullname($forceFullname) . ' ' . $this->translator->trans('forum.has_written', [], 'YosimitsoWorkingForumBundle', $locale) . ":** <br>"
                         .$this->markdownQuote($this->quote($post->getContent(), $locale)) . "\n\n";
 
                     return $blockquote;

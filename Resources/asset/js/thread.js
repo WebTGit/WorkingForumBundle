@@ -148,7 +148,7 @@ jQuery(document).ready(() => {
             async: false,
             success: () => {
                 jQuery("#wf_add_subscription").html('<i class="flaticon-cancel"></i>'+storeJs.trans["forum.cancel_subscription"]).addClass("btn-danger").removeClass("btn-primary").attr("onclick", "cancelSubscription(); return false;");
-                jQuery("#wf_subscription_status").html('<i class="flaticon-alert text-white"></i> '+storeJs.trans["forum.status_subscribed"]).addClass("label-success").removeClass("label-danger");
+                jQuery("#wf_subscription_status").html('<i class="flaticon-alert text-white"></i>&nbsp;'+storeJs.trans["forum.status_subscribed"]).addClass("label-success").removeClass("label-danger");
             },
             error: () => {
                 alert(storeJs.trans['message.generic_error']);
@@ -168,7 +168,7 @@ jQuery(document).ready(() => {
             async: false,
             success: () => {
                 jQuery("#wf_add_subscription").html('<i class="flaticon-email"></i>'+storeJs.trans["forum.add_subscription"]).addClass("btn-primary").removeClass("btn-danger").attr("onclick", "addSubscription(); return false;");
-                jQuery("#wf_subscription_status").html('<i class="flaticon-alert-off text-white"></i> '+storeJs.trans["forum.status_not_subscribed"]).addClass("label-danger").removeClass("label-success");
+                jQuery("#wf_subscription_status").html('<i class="flaticon-alert-off text-white"></i>&nbsp;'+storeJs.trans["forum.status_not_subscribed"]).addClass("label-danger").removeClass("label-success");
             },
             error: () => {
                 alert(storeJs.trans['message.generic_error']);
