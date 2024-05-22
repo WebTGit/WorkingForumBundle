@@ -20,6 +20,7 @@ use Yosimitso\WorkingForumBundle\Entity\UserInterface;
 use Yosimitso\WorkingForumBundle\Form\MoveThreadType;
 use Yosimitso\WorkingForumBundle\Form\PostType;
 use Yosimitso\WorkingForumBundle\Form\ThreadType;
+use Yosimitso\WorkingForumBundle\Security\AuthorizationGuard;
 use Yosimitso\WorkingForumBundle\Security\AuthorizationGuardInterface;
 use Yosimitso\WorkingForumBundle\Service\FileUploaderService;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -54,7 +55,7 @@ class ThreadService
         BundleParametersService $bundleParameters,
         FormFactory $formFactory,
         RouterInterface $router,
-        Environment $templating
+        Environment $templating,
     )
     {
         $this->lockThreadOlderThan = $lockThreadOlderThan;
@@ -288,7 +289,8 @@ class ThreadService
      */
     public function getAvailableActions(?UserInterface $user, Thread $thread, $autolock, $canSubscribeThread)
     {
-        $anonymousUser = (!$user instanceof UserInterface);
+        // User must be instance of UserInterface and must have set a nickname or he cannot write posts.
+        $anonymousUser = $this->authorizationGuard->isAnonymous();
 
         return [
             'setResolved' => $this->authorizationGuard->hasModeratorAuthorization() || (!$anonymousUser && $user->getId() == $thread->getAuthor()->getId()),

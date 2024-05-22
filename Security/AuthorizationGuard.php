@@ -128,7 +128,7 @@ class AuthorizationGuard implements AuthorizationGuardInterface
 
     public function isAnonymous() : bool
     {
-        return !is_object($this->user) || !$this->user instanceof UserInterface;
+        return $this->user->getNickname() === null || !is_object($this->user) || !$this->user instanceof UserInterface;
     }
 
     public function filterForumAccess(array $forums) : void
