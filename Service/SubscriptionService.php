@@ -62,42 +62,45 @@ class SubscriptionService
         if (is_null($post->getThread())) {
             return false;
         }
-        $notifs = $this->em->getRepository(Subscription::class)->findBy(['thread' => $post->getThread()->getId()]);
-        if (!count($notifs)) {
+
+        $subscriptions = $this->em->getRepository(Subscription::class)->findBy(['thread' => $post->getThread()->getId()]);
+        if (!count($subscriptions)) {
             return false;
         }
+
         $emailTranslation = $this->getEmailTranslation($post->getThread()->getSubforum(), $post->getThread(), $post, $post->getUser());
-        
-        if (!is_null($notifs)) {
-            foreach ($notifs as $notif) {
-                try {
-                    if (
-                        !empty($notif->getUser()->getEmailAddress()) and            // Only if valid Email
-                        $notif->getUser()->getId() !== $post->getUser()->getId()    // Post User is not equal to Notif User
-                    ) {
-                        $emailTranslation['user'] = $notif->getUser();
-                        $locale = $notif->getUser()->getLanguage()->getLocaleCode();
-                        $email = (new Email())
-                            ->subject($this->translator->trans('subscription.emailNotification.subject', $emailTranslation, 'YosimitsoWorkingForumBundle', $locale))
-                            ->from(new Address($this->senderAddress, $this->senderName))
-                            ->to($notif->getUser()->getEmailAddress())
-                            ->html(
-                                $this->templating->render(
-                                    '@YosimitsoWorkingForum/Email/notification_new_message_'. $locale .'.html.twig',
-                                    $emailTranslation
-                                )
+
+        foreach ($subscriptions as $subscriptionItem) {
+            try {
+                if (
+                    !empty($subscriptionItem->getUser()->getEmailAddress()) and            // Only if valid Email
+                    $subscriptionItem->getUser()->getId() !== $post->getUser()->getId()    // User that created the post is not equal to subscribed User
+                ) {
+                    $emailTranslation['user'] = $subscriptionItem->getUser();
+                    $locale = $subscriptionItem->getUser()->getLanguage()->getLocaleCode();
+                    $email = (new Email())
+                        ->subject($this->translator->trans('subscription.post.emailNotification.subject', [
+                            '%siteTitle%' => $emailTranslation['siteTitle'],
+                            '%threadLabel%' => $emailTranslation['threadLabel']
+                        ], 'YosimitsoWorkingForumBundle', $locale))
+                        ->from(new Address($this->senderAddress, $this->senderName))
+                        ->to($subscriptionItem->getUser()->getEmailAddress())
+                        ->html(
+                            $this->templating->render(
+                                '@YosimitsoWorkingForum/Email/notification_new_message_'. $locale .'.html.twig',
+                                $emailTranslation
                             )
-                        ;
+                        )
+                    ;
 
-                        $this->mailer->send($email);
-                    }
-                } catch (\Exception $e) {
-                    throw new \Exception($e->getMessage());
+                    $this->mailer->send($email);
                 }
+            } catch (\Exception $e) {
+                throw new \Exception($e->getMessage());
             }
-
-            return true;
         }
+
+        return true;
     }
 
     /**
@@ -116,15 +119,24 @@ class SubscriptionService
             'postUser' => $post->getUser()
         ];
     }
-
+    
+    
+    /**
+     * Notify the Application Owner of a new post
+     * @throws \Exception
+     */
     public function notifyPostApplicationOwner(Post $post)
     {
         $emailTranslation = $this->getEmailTranslation($post->getThread()->getSubforum(), $post->getThread(), $post, $post->getUser());
 
+        // Would be better to set it to the default locale
         $locale = 'de';
 
         $email = (new Email())
-            ->subject($this->translator->trans('subscription.emailNotification.subject', $emailTranslation, 'YosimitsoWorkingForumBundle', $locale))
+            ->subject($this->translator->trans('subscription.post.emailNotification.subject', [
+                '%siteTitle%' => $emailTranslation['siteTitle'],
+                '%threadLabel%' => $emailTranslation['threadLabel']
+            ], 'YosimitsoWorkingForumBundle', $locale))
             ->from(new Address($this->senderAddress, $this->senderName))
             ->to($this->senderAddress)
             ->html(
@@ -138,8 +150,13 @@ class SubscriptionService
         $this->mailer->send($email);
     }
 
+    /**
+     * Notify the Application Owner of a new thread
+     * @throws \Exception
+     */
     public function notifyThreadApplicationOwner(Thread $entity)
     {
+        // Would be better to set it to the default locale
         $locale = 'de';
 
         $params = [
@@ -150,7 +167,10 @@ class SubscriptionService
         ];
 
         $email = (new Email())
-            ->subject($this->translator->trans('subscription.thread.emailNotification.subject', $params, 'YosimitsoWorkingForumBundle', $locale))
+            ->subject($this->translator->trans('subscription.thread.emailNotification.subject', [
+                '%siteTitle%' => $params['siteTitle'],
+                '%threadLabel%' => $params['threadLabel']
+            ], 'YosimitsoWorkingForumBundle', $locale))
             ->from(new Address($this->senderAddress, $this->senderName))
             ->to($this->senderAddress)
             ->html(
@@ -164,10 +184,14 @@ class SubscriptionService
         $this->mailer->send($email);
     }
 
+    /**
+     * Notify subscribed users of a new thread
+     * @throws \Exception
+     */
     public function notifyTreadSubscriptions(Thread $entity)
     {
-        $notifs = $this->em->getRepository(User::class)->findBy(['notifyNewThreads' => true]);
-        if (!count($notifs))
+        $subscribedUsers = $this->em->getRepository(User::class)->findBy(['notifyNewThreads' => true]);
+        if (!count($subscribedUsers))
         {
             return false;
         }
@@ -179,43 +203,50 @@ class SubscriptionService
             'threadUser' => $entity->getAuthor()
         ];
 
-        if (!is_null($notifs))
+        foreach ($subscribedUsers as $user)
         {
-            foreach ($notifs as $user)
+            try
             {
-                try
+                if (
+                    !empty($user->getEmailAddress()) and // Only if valid Email
+                    $user->getId() !== $entity->getAuthor()->getId()    // Post User is not equal to Notif User
+                )
                 {
-                    if (
-                        !empty($user->getEmailAddress()) and // Only if valid Email
-                        $user->getId() !== $entity->getAuthor()->getId()    // Post User is not equal to Notif User
-                    )
-                    {
-                        $params['user'] = $user;
-                        $locale = $user->getLanguage()->getLocaleCode();
-                        $email = (new Email())
-                            ->subject($this->translator->trans('subscription.thread.emailNotification.subject', $params, 'YosimitsoWorkingForumBundle', $locale))
-                            ->from(new Address($this->senderAddress, $this->senderName))
-                            ->to($user->getEmailAddress())
-                            ->html(
-                                $this->templating->render(
-                                    '@YosimitsoWorkingForum/Email/notification_new_thread_' . $locale . '.html.twig',
-                                    $params
-                                )
-                            );
+                    $params['user'] = $user;
+                    $locale = $user->getLanguage()->getLocaleCode();
+                    $email = (new Email())
+                        ->subject($this->translator->trans('subscription.thread.emailNotification.subject', [
+                            '%siteTitle%' => $params['siteTitle'],
+                            '%threadLabel%' => $params['threadLabel']
+                        ], 'YosimitsoWorkingForumBundle', $locale))
+                        ->from(new Address($this->senderAddress, $this->senderName))
+                        ->to($user->getEmailAddress())
+                        ->html(
+                            $this->templating->render(
+                                '@YosimitsoWorkingForum/Email/notification_new_thread_' . $locale . '.html.twig',
+                                $params
+                            )
+                        );
 
-                        $this->mailer->send($email);
-                    }
-                } catch (\Exception $e)
-                {
-                    throw new \Exception($e->getMessage());
+                    $this->mailer->send($email);
                 }
+            } catch (\Exception $e)
+            {
+                throw new \Exception($e->getMessage());
             }
-
-            return true;
         }
+
+        return true;
     }
 
-    public function notifyTreadSubscriptionsTask()
+    // Target: Users
+    // to be used by a symfony command for daily updates
+    // sends a daily mail of new threads to users who want to be notified
+    /**
+     * Notify subscribed users of all new thread
+     * @throws \Exception
+     */
+    public function notifyTreadSubscriptionsTask(): bool
     {
         // Threads where notificationSent is false
         $threads = $this->em->getRepository(Thread::class)->findBy(['notificationSent' => false]);
@@ -224,6 +255,7 @@ class SubscriptionService
             return false;
         }
 
+        // Generate the Thread Parameters
         $threadsParams = [];
         foreach ($threads as $thread)
         {
@@ -232,15 +264,11 @@ class SubscriptionService
                 'thread' => $thread,
                 'threadUser' => $thread->getAuthor()
             ];
-
-            $thread->setNotificationSent(true);
-            $this->em->persist($thread);
         }
-        $this->em->flush();
 
         // Users where notifyNewThreads is true
-        $notifs = $this->em->getRepository(User::class)->findBy(['notifyNewThreads' => true]);
-        if (!count($notifs))
+        $subscribedUsers = $this->em->getRepository(User::class)->findBy(['notifyNewThreads' => true]);
+        if (!count($subscribedUsers))
         {
             return false;
         }
@@ -250,37 +278,44 @@ class SubscriptionService
             'threads' => $threadsParams,
         ];
 
-        if (!is_null($notifs))
+        foreach ($subscribedUsers as $user)
         {
-            foreach ($notifs as $user)
+            try
             {
-                try
+                if (
+                    !empty($user->getEmailAddress()) // Only if valid Email
+                )
                 {
-                    if (
-                        !empty($user->getEmailAddress()) // Only if valid Email
-                    )
-                    {
-                        $params['user'] = $user;
-                        $locale = $user->getLanguage()->getLocaleCode();
-                        $email = (new Email())
-                            ->subject($this->translator->trans('subscription.thread.emailNotification.subject_task', $params, 'YosimitsoWorkingForumBundle', $locale))
-                            ->from(new Address($this->senderAddress, $this->senderName))
-                            ->to($user->getEmailAddress())
-                            ->html(
-                                $this->templating->render(
-                                    '@YosimitsoWorkingForum/Email/task/notification_new_thread_' . $locale . '.html.twig',
-                                    $params
-                                )
-                            );
-                        $this->mailer->send($email);
-                    }
-                } catch (\Exception $e)
-                {
-                    throw new \Exception($e->getMessage());
+                    $params['user'] = $user;
+                    $locale = $user->getLanguage()->getLocaleCode();
+                    $email = (new Email())
+                        ->subject($this->translator->trans('subscription.thread.emailNotification.subject_task', [
+                            '%siteTitle' => $params['siteTitle']
+                        ], 'YosimitsoWorkingForumBundle', $locale))
+                        ->from(new Address($this->senderAddress, $this->senderName))
+                        ->to($user->getEmailAddress())
+                        ->html(
+                            $this->templating->render(
+                                '@YosimitsoWorkingForum/Email/task/notification_new_thread_' . $locale . '.html.twig',
+                                $params
+                            )
+                        );
+                    $this->mailer->send($email);
                 }
+            } catch (\Exception $e)
+            {
+                throw new \Exception($e->getMessage());
             }
-
-            return true;
         }
+
+        // Set Notification sent to true, so they won't be sent again
+        foreach ($threads as $thread)
+        {
+            $thread->setNotificationSent(true);
+            $this->em->persist($thread);
+        }
+        $this->em->flush();
+
+        return true;
     }
 }

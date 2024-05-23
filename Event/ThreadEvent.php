@@ -48,9 +48,10 @@ class ThreadEvent
 
         if (isset($changeset['slug'])) {
             if ($this->paramSubscription['enable']) {
-//                $this->subscriptionService->notifyThreadApplicationOwner($entity);
-//                $this->subscriptionService->notifyTreadSubscriptions($entity);
-                $this->subscriptionService->notifyTreadSubscriptionsTask();
+                $this->subscriptionService->notifyTreadSubscriptions($entity);
+                $this->subscriptionService->notifyThreadApplicationOwner($entity);
+                // This should be executed in a command, it does basically the same as notifyTreadSubscriptions, but sends all threads that were not sent by the time of execution and sets the threads notificationSent-flag to true.
+//                $this->subscriptionService->notifyTreadSubscriptionsTask();
             }
         }
 
