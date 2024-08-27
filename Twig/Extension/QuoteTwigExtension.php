@@ -64,12 +64,16 @@ class QuoteTwigExtension extends AbstractExtension
      *
      * @return mixed
      */
-    public function quote($text, $locale=null)
+    public function quote($text, $locale=null, $user=null)
     {
         $content = preg_replace_callback('#\[quote=([0-9]+)\]#',
-            function ($listQuote) use ($locale)
+            function ($listQuote) use ($locale, $user)
             {
 
+                // User muss übergeben werden, sonst, wird im E-Mail der Fullname des Schreibenden angezeigt
+                if($user === null){
+                    $user = $this->security->getUser();
+                }
                 /** @var Post $post */
                 $post = $this->entityManager
                     ->getRepository(Post::class)
@@ -77,12 +81,13 @@ class QuoteTwigExtension extends AbstractExtension
                 ;
 
                 //Fullname forcen wenn Admin oder PostUser gleich CurrentUser
-                $forceFullname = ($this->authorizationChecker->isGranted('ROLE_ADMIN') or $post->getUser()->getId() === $this->security->getUser()->getId());
+                $forceFullname = ($this->authorizationChecker->isGranted('ROLE_ADMIN') or $post->getUser()->getId() === $user->getId());
+
 
                 if (!is_null($post) && empty($post->getModerateReason())) {
 
                     $blockquote = "\n>**" . $post->getUser()->getFullname($forceFullname) . ' ' . $this->translator->trans('forum.has_written', [], 'YosimitsoWorkingForumBundle', $locale) . ":** <br>"
-                        .$this->markdownQuote($this->quote($post->getContent(), $locale)) . "\n\n";
+                        .$this->markdownQuote($this->quote($post->getContent(), $locale, $user)) . "\n\n";
 
                     return $blockquote;
                 }
