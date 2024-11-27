@@ -4,6 +4,7 @@
 namespace Yosimitso\WorkingForumBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -19,31 +20,15 @@ use App\Entity\User\User;
 
 class SubscriptionService
 {
-    private EntityManager $em;
-    private MailerInterface $mailer;
-    private TranslatorInterface $translator;
-    private string $siteTitle;
-    private ?string $senderAddress;
-    private Environment $templating;
-    private ?string $senderName;
-
     public function __construct(
-        EntityManager $em,
-        MailerInterface $mailer,
-        TranslatorInterface $translator,
-        string $siteTitle,
-        Environment $templating,
-        ?string $senderAddress,
-        ?string $senderName
+        protected readonly EntityManagerInterface $em,
+        protected readonly MailerInterface $mailer,
+        protected readonly TranslatorInterface $translator,
+        protected readonly string $siteTitle,
+        protected readonly Environment $templating,
+        protected readonly ?string $senderAddress,
+        protected readonly ?string $senderName
     ) {
-        $this->em = $em;
-        $this->mailer = $mailer;
-        $this->translator = $translator;
-        $this->siteTitle = $siteTitle;
-        $this->senderAddress = $senderAddress;
-        $this->senderName = $senderName;
-        $this->templating = $templating;
-
         if (empty($this->senderAddress)) {
             trigger_error('The parameter "yosimitso_working_forum.mailer_sender_address" is empty, email delivering might failed');
         }
@@ -119,8 +104,8 @@ class SubscriptionService
             'postUser' => $post->getUser()
         ];
     }
-    
-    
+
+
     /**
      * Notify the Application Owner of a new post
      * @throws \Exception

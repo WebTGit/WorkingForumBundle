@@ -10,46 +10,17 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Yosimitso\WorkingForumBundle\Entity\Post;
 
-/**
- * Class QuoteTwigExtension
- *
- * @package Yosimitso\WorkingForumBundle\Twig\Extension
- */
+
 class QuoteTwigExtension extends AbstractExtension
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-
-    private $authorizationChecker;
-
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param TranslatorInterface    $translator
-     */
     public function __construct(
-        EntityManagerInterface $entityManager,
-        TranslatorInterface $translator,
-        AuthorizationCheckerInterface $authorizationChecker,
-        Security $security
-    )
-    {
-        $this->entityManager = $entityManager;
-        $this->translator = $translator;
-        $this->authorizationChecker = $authorizationChecker;
-        $this->security = $security;
-    }
+        protected readonly EntityManagerInterface $entityManager,
+        protected readonly TranslatorInterface $translator,
+        protected readonly AuthorizationCheckerInterface $authorizationChecker,
+        protected readonly Security $security
+    ) {}
 
-    /**
-     * @return array
-     */
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter(
@@ -59,12 +30,7 @@ class QuoteTwigExtension extends AbstractExtension
         ];
     }
 
-    /**
-     * @param string $text
-     *
-     * @return mixed
-     */
-    public function quote($text, $locale=null, $user=null)
+    public function quote(string $text, $locale=null, $user=null)
     {
         $content = preg_replace_callback('#\[quote=([0-9]+)\]#',
             function ($listQuote) use ($locale, $user)
@@ -100,16 +66,10 @@ class QuoteTwigExtension extends AbstractExtension
         return $content;
     }
 
-    /**
-     * @param string $text
-     * @return string|string[]|null
-     */
-    private function markdownQuote($text) {
+    private function markdownQuote(string $text) {
         return preg_replace('/\n/', "\n >", $text );
     }
-    /**
-     * @return string
-     */
+
     public function getName()
     {
         return 'quote';

@@ -10,11 +10,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Yosimitso\WorkingForumBundle\Entity\Subforum;
 
-/**
- * Class SearchType
- *
- * @package Yosimitso\WorkingForumBundle\Form
- */
+
 class SearchType extends AbstractType
 {
     /**

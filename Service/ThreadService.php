@@ -6,9 +6,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Forms;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 use Yosimitso\WorkingForumBundle\Entity\Post;
@@ -30,52 +32,28 @@ use Symfony\Component\Form\FormFactory;
 
 class ThreadService
 {
-    protected int $lockThreadOlderThan;
-    protected PaginatorInterface $paginator;
-    protected int $postPerPage;
-    protected RequestStack $requestStack;
-    protected EntityManagerInterface $em;
     protected ?UserInterface $user;
-    protected FileUploaderService $fileUploaderService;
-    protected AuthorizationGuardInterface $authorizationGuard;
-    protected BundleParametersService $bundleParameters;
-    protected FormFactory $formFactory;
-    protected RouterInterface $router;
-    protected Environment $templating;
 
     public function __construct(
-        int $lockThreadOlderThan,
-        PaginatorInterface $paginator,
-        int $postPerPage,
-        RequestStack $requestStack,
-        EntityManagerInterface $em,
+        protected readonly int $lockThreadOlderThan,
+        protected readonly PaginatorInterface $paginator,
+        protected readonly int $postPerPage,
+        protected readonly RequestStack $requestStack,
+        protected readonly EntityManagerInterface $em,
         TokenStorageInterface $tokenStorage,
-        FileUploaderService $fileUploaderService,
-        AuthorizationGuardInterface $authorizationGuard,
-        BundleParametersService $bundleParameters,
-        FormFactory $formFactory,
-        RouterInterface $router,
-        Environment $templating,
+        protected readonly FileUploaderService $fileUploaderService,
+        protected readonly AuthorizationGuardInterface $authorizationGuard,
+        protected readonly BundleParametersService $bundleParameters,
+        protected readonly FormFactoryInterface $formFactory,
+        protected readonly RouterInterface $router,
+        protected readonly Environment $templating
     )
     {
-        $this->lockThreadOlderThan = $lockThreadOlderThan;
-        $this->paginator = $paginator;
-        $this->postPerPage = $postPerPage;
-        $this->requestStack = $requestStack;
-        $this->em = $em;
-        $user = $tokenStorage->getToken()->getUser();
+        $user = $tokenStorage->getToken() ? $tokenStorage->getToken()->getUser() : null;
         $this->user = is_object($user) ? $user : null;
-        $this->fileUploaderService = $fileUploaderService;
-        $this->authorizationGuard = $authorizationGuard;
-        $this->bundleParameters = $bundleParameters;
-        $this->formFactory = $formFactory;
-        $this->router = $router;
-        $this->templating = $templating;
     }
 
     /**
-     * @param Thread $thread
-     * @return bool
      * @throws \Exception
      *
      * Is the thread autolocked ?
@@ -209,11 +187,6 @@ class ThreadService
     }
 
     /**
-     * @param Form $form
-     * @param Post $post
-     * @param Thread $thread
-     * @param Subforum $subforum
-     * @return bool
      * @throws \Exception
      *
      * Create a thread
@@ -257,8 +230,6 @@ class ThreadService
     }
 
     /**
-     * @param PostType $form
-     *
      * Create a post
      */
     public function post(Subforum $subforum, Thread $thread, Post $post, UserInterface $user, $form) : bool
@@ -318,12 +289,7 @@ class ThreadService
         ));
     }
 
-    /**
-     * @param Forum $forum
-     * @param Subforum $subforum
-     * @return RedirectResponse
-     */
-    public function redirectToSubforum(Forum $forum, Subforum $subforum)
+    public function redirectToSubforum(Forum $forum, Subforum $subforum): RedirectResponse
     {
         return new RedirectResponse($this->router->generate('workingforum_subforum',
             [
@@ -333,7 +299,7 @@ class ThreadService
         ));
     }
 
-    public function redirectToForbiddenAccess(Subforum $subforum, $forbiddenMessage)
+    public function redirectToForbiddenAccess(Subforum $subforum, $forbiddenMessage): Response
     {
             return $this->templating->render(
                 '@YosimitsoWorkingForum/Forum/thread_list.html.twig',
@@ -344,5 +310,4 @@ class ThreadService
                 ]
             );
     }
-
 }

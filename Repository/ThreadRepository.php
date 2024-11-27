@@ -11,19 +11,9 @@ use Yosimitso\WorkingForumBundle\Entity\Thread;
 use Yosimitso\WorkingForumBundle\Entity\UserInterface;
 use App\Entity\User\UserDetail;
 
-/**
- * Class ThreadRepository
- *
- * @package Yosimitso\WorkingForumBundle\Repository
- */
+
 class ThreadRepository extends EntityRepository
 {
-    /**
-     * @param integer $start
-     * @param integer $limit
-     *
-     * @return array
-     */
     public function getThread(int $start = 0, int $limit = 10)
     {
         $queryBuilder = $this->_em->createQueryBuilder();
@@ -41,11 +31,6 @@ class ThreadRepository extends EntityRepository
     }
 
     /**
-     * @param string  $keywords
-     * @param integer $start
-     * @param integer $limit
-     * @param string  $delimiter
-     *
      * @return Thread[]
      */
     public function search(string $keywords, int $start = 0, int $limit = 100, array $whereSubforum = []) : ?array
@@ -53,17 +38,25 @@ class ThreadRepository extends EntityRepository
         if (empty($whereSubforum)) {
             return null;
         }
-        //$keywords = explode(' ', $keywords);
+
         $where = '';
+
+        // New Version Yosimitso
+        foreach ($keywords as $word)
+        {
+            $where .= "(thread.label LIKE '%" . $word . "%' OR thread.subLabel LIKE '%" . $word . "%' OR post.content LIKE '%" . $word . "%') OR";
+        }
+
+        $where = rtrim($where, ' OR');
 
 //        foreach ($keywords as $word)
 //        {
 //            $where .= "(thread.label LIKE '%" . $word . "%' OR thread.subLabel LIKE '%" . $word . "%' OR post.content LIKE '%" . $word . "%') OR";
 //        }
 
-        $where .= "(thread.label LIKE '%" . $keywords . "%' OR thread.subLabel LIKE '%" . $keywords . "%' OR post.content LIKE '%" . $keywords . "%') OR";
+//        $where .= "(thread.label LIKE '%" . $keywords . "%' OR thread.subLabel LIKE '%" . $keywords . "%' OR post.content LIKE '%" . $keywords . "%') OR";
 
-        $where = rtrim($where, ' OR');
+//        $where = rtrim($where, ' OR');
 
         $queryBuilder = $this->_em->createQueryBuilder();
         $queryBuilder
