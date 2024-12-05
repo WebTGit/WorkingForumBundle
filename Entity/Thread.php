@@ -64,7 +64,7 @@ class Thread
     private ?bool $pin;
 
     #[ORM\Column(name: "notificationSent", type: "boolean", nullable: true, options: ['default' => 0])]
-    private ?bool $notificationSent;
+    private ?bool $notificationSent = false;
 
     #[ORM\OneToMany(targetEntity: "Yosimitso\WorkingForumBundle\Entity\Subscription", mappedBy: "thread", cascade: ["remove"])]
     private Collection $subscriptions;

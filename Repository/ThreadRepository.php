@@ -38,25 +38,17 @@ class ThreadRepository extends EntityRepository
         if (empty($whereSubforum)) {
             return null;
         }
-
+        //$keywords = explode(' ', $keywords);
         $where = '';
-
-        // New Version Yosimitso
-        foreach ($keywords as $word)
-        {
-            $where .= "(thread.label LIKE '%" . $word . "%' OR thread.subLabel LIKE '%" . $word . "%' OR post.content LIKE '%" . $word . "%') OR";
-        }
-
-        $where = rtrim($where, ' OR');
 
 //        foreach ($keywords as $word)
 //        {
 //            $where .= "(thread.label LIKE '%" . $word . "%' OR thread.subLabel LIKE '%" . $word . "%' OR post.content LIKE '%" . $word . "%') OR";
 //        }
 
-//        $where .= "(thread.label LIKE '%" . $keywords . "%' OR thread.subLabel LIKE '%" . $keywords . "%' OR post.content LIKE '%" . $keywords . "%') OR";
+        $where .= "(thread.label LIKE '%" . $keywords . "%' OR thread.subLabel LIKE '%" . $keywords . "%' OR post.content LIKE '%" . $keywords . "%') OR";
 
-//        $where = rtrim($where, ' OR');
+        $where = rtrim($where, ' OR');
 
         $queryBuilder = $this->_em->createQueryBuilder();
         $queryBuilder
