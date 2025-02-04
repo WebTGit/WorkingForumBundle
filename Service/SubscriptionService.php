@@ -5,6 +5,7 @@ namespace Yosimitso\WorkingForumBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -27,7 +28,8 @@ class SubscriptionService
         protected readonly string $siteTitle,
         protected readonly Environment $templating,
         protected readonly ?string $senderAddress,
-        protected readonly ?string $senderName
+        protected readonly ?string $senderName,
+        protected readonly LoggerInterface $logger,
     ) {
         if (empty($this->senderAddress)) {
             trigger_error('The parameter "yosimitso_working_forum.mailer_sender_address" is empty, email delivering might failed');
@@ -80,8 +82,15 @@ class SubscriptionService
 
                     $this->mailer->send($email);
                 }
+            } catch (\Symfony\Component\Mime\Exception\RfcComplianceException $e) {
+                // Fehler protokollieren und dann mit der nächsten E-Mail fortfahren
+                $this->logger->error('Ungültige E-Mail-Adresse für User-ID ' . $subscriptionItem->getUser()->getId() . ': ' . $e->getMessage());
+                // Optionale weitere Massnahmen, z.B. in eine Datenbank loggen oder den Benutzer markieren.
+                continue; // Mit dem nächsten Benutzer fortfahren
             } catch (\Exception $e) {
-                throw new \Exception($e->getMessage());
+                // Auch andere Exceptions werden hier abgefangen, protokolliert und der Versand wird fortgesetzt
+                $this->logger->error('Fehler beim Senden an User-ID ' . $subscriptionItem->getUser()->getId() . ': ' . $e->getMessage());
+                continue;
             }
         }
 
@@ -215,9 +224,15 @@ class SubscriptionService
 
                     $this->mailer->send($email);
                 }
-            } catch (\Exception $e)
-            {
-                throw new \Exception($e->getMessage());
+            } catch (\Symfony\Component\Mime\Exception\RfcComplianceException $e) {
+                // Fehler protokollieren und dann mit der nächsten E-Mail fortfahren
+                $this->logger->error('Ungültige E-Mail-Adresse für User-ID ' . $user->getId() . ': ' . $e->getMessage());
+                // Optionale weitere Massnahmen, z.B. in eine Datenbank loggen oder den Benutzer markieren.
+                continue; // Mit dem nächsten Benutzer fortfahren
+            } catch (\Exception $e) {
+                // Auch andere Exceptions werden hier abgefangen, protokolliert und der Versand wird fortgesetzt
+                $this->logger->error('Fehler beim Senden an User-ID ' . $user->getId() . ': ' . $e->getMessage());
+                continue;
             }
         }
 
